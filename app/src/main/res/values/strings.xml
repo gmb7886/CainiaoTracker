@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">CainiaoTracker</string>
+    <string name="title_home">Início</string>
+    <string name="title_archived">Arquivados</string>
+    <string name="title_settings">Configurações</string>
+    <string name="add">Adicionar</string>
+    <string name="delete">Deletar</string>
+    <string name="archive">Arquivar</string>
+</resources>
