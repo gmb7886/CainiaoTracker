@@ -42,6 +42,7 @@ class TrackingActivity : AppCompatActivity() {
     private var isDarkTheme = false
     private val handler = Handler(Looper.getMainLooper())
     private var continuousRemovalRunnable: Runnable? = null
+    private var hasInitiallyLoaded = false // Flag para controlar carregamento inicial
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,7 +63,7 @@ class TrackingActivity : AppCompatActivity() {
             }
         })
 
-        // Verifica a conexão com a internet para decidir o que carregar
+        // Verifica a conexão com a internet APENAS no carregamento inicial
         val url = intent.getStringExtra(EXTRA_URL)
         if (!isOnline()) {
             showNoInternetUI()
@@ -76,249 +77,128 @@ class TrackingActivity : AppCompatActivity() {
     }
     @SuppressLint("ObsoleteSdkInt")
 
-
-
     private fun configureSystemBarsForLegacyDevices() {
-
-
 
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
 
-
-
             val isDarkMode = when (AppCompatDelegate.getDefaultNightMode()) {
-
-
 
                 AppCompatDelegate.MODE_NIGHT_YES -> true
 
-
-
                 AppCompatDelegate.MODE_NIGHT_NO -> false
-
-
 
                 else -> {
 
-
-
                     val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-
-
 
                     currentNightMode == Configuration.UI_MODE_NIGHT_YES
 
-
-
                 }
 
-
-
             }
-
-
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 
-
-
                 window.apply {
 
-
-
                     @Suppress("DEPRECATION")
-
-
 
                     clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
 
-
-
                     addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-
-
 
                     if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.N_MR1) {
 
-
-
                         @Suppress("DEPRECATION")
-
-
 
                         statusBarColor = Color.BLACK
 
-
-
                         @Suppress("DEPRECATION")
-
-
 
                         navigationBarColor = Color.BLACK
 
-
-
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
-
-
                             @Suppress("DEPRECATION")
-
-
 
                             var flags = decorView.systemUiVisibility
 
-
-
                             @Suppress("DEPRECATION")
-
-
 
                             flags = flags and View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR.inv()
 
-
-
                             @Suppress("DEPRECATION")
-
-
 
                             decorView.systemUiVisibility = flags
 
-
-
                         }
-
-
 
                     } else {
 
-
-
                         @Suppress("DEPRECATION")
-
-
 
                         navigationBarColor = if (isDarkMode) {
 
-
-
                             ContextCompat.getColor(this@TrackingActivity, R.color.fundo)
-
-
 
                         } else {
 
-
-
                             ContextCompat.getColor(this@TrackingActivity, R.color.fundo)
-
-
 
                         }
 
-
-
                     }
-
-
 
                 }
 
-
-
             }
-
-
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
-
-
                 @Suppress("DEPRECATION")
 
-
-
                 var flags = window.decorView.systemUiVisibility
-
-
 
                 if (isDarkMode) {
 
-
-
                     @Suppress("DEPRECATION")
-
-
 
                     flags = flags and View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR.inv()
 
-
-
                 } else if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
-
-
 
                     @Suppress("DEPRECATION")
 
-
-
                     flags = flags or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-
-
 
                 }
 
-
-
                 @Suppress("DEPRECATION")
-
-
 
                 window.decorView.systemUiVisibility = flags
 
-
-
             }
-
-
 
             if (!isDarkMode && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
-
-
                 @Suppress("DEPRECATION")
-
-
 
                 var flags = window.decorView.systemUiVisibility
 
-
-
                 @Suppress("DEPRECATION")
-
-
 
                 flags = flags or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
 
-
-
                 @Suppress("DEPRECATION")
-
-
 
                 window.decorView.systemUiVisibility = flags
 
-
-
             }
-
-
 
         }
 
-
-
     }
+
     private fun initializeViews() {
         webView = findViewById(R.id.webView)
         progressBar = findViewById(R.id.progressBar)
@@ -371,9 +251,6 @@ class TrackingActivity : AppCompatActivity() {
         }
 
         // Desabilita a seleção de texto para versões mais antigas do Android
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            webView.isLongClickable = false
-        }
 
 
         // --- IMPLEMENTAÇÃO DO TEMA ESCURO (TÉCNICA ATUALIZADA) ---
@@ -402,6 +279,7 @@ class TrackingActivity : AppCompatActivity() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 progressBar.visibility = View.GONE
+                hasInitiallyLoaded = true // Marca que carregou pela primeira vez
 
                 // Aplica o tema escuro e remove elementos via JS como fallback
                 applyDarkThemeViaJs()
@@ -526,8 +404,8 @@ class TrackingActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         webView.onResume()
-        // Reinicia a remoção contínua ao voltar para o app
-        if (webView.url != null) {
+        // Reinicia a remoção contínua APENAS se já carregou inicialmente
+        if (hasInitiallyLoaded && webView.url != null) {
             startContinuousElementRemoval()
         }
     }
