@@ -57,7 +57,7 @@ class TrackingAdapter(
                 }
             }
             AdapterMode.ARCHIVED -> {
-                holder.btnArchive.setImageResource(R.drawable.ic_button_archive) //criar outro ícone para desarquivar
+                holder.btnArchive.setImageResource(R.drawable.ic_unarchive)
                 holder.itemView.setOnClickListener {
                     Toast.makeText(holder.itemView.context, "Para rastrear a encomenda, desarquive-a.", Toast.LENGTH_SHORT).show()
                 }

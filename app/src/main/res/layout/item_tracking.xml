@@ -26,6 +26,8 @@
                 android:id="@+id/btn_archive"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
+                android:paddingLeft="8dp"
+                android:paddingRight="15dp"
                 android:background="?selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_button_archive"
                 android:contentDescription="@string/archive" />
@@ -34,6 +36,8 @@
                 android:id="@+id/btn_delete"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
+                android:paddingLeft="17dp"
+                android:paddingRight="9dp"
                 android:background="?selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_delete"
                 android:contentDescription="@string/delete" />
