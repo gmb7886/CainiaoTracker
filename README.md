@@ -1,4 +1,4 @@
-# CaninaoTracker #
+# CaniaoTracker #
 
 <img src="https://github.com/gmb7886/CainiaoTracker/blob/master/app/src/main/ic_launcher-playstore.png" width="200"/> 
 
