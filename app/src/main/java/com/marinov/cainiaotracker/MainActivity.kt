@@ -105,7 +105,7 @@ class MainActivity : AppCompatActivity() {
                     } else {
                         @Suppress("DEPRECATION")
                         navigationBarColor = if (isDarkMode) {
-                            ContextCompat.getColor(this@MainActivity, R.color.borda)
+                            ContextCompat.getColor(this@MainActivity, R.color.fundo)
                         } else {
                             ContextCompat.getColor(this@MainActivity, R.color.fundo)
                         }

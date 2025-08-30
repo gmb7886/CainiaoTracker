@@ -202,7 +202,7 @@ class TrackingActivity : AppCompatActivity() {
 
 
 
-                            ContextCompat.getColor(this@TrackingActivity, R.color.borda)
+                            ContextCompat.getColor(this@TrackingActivity, R.color.fundo)
 
 
 

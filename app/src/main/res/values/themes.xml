@@ -9,9 +9,11 @@
         <item name="colorSecondary">@color/md_theme_light_secondary</item>
         <item name="colorSecondaryVariant">@color/md_theme_light_secondaryContainer</item>
         <item name="colorOnSecondary">@color/md_theme_light_onSecondary</item>
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <item name="android:navigationBarColor">@color/fundo</item>
+        <item name="android:statusBarColor">@color/fundo</item>
         <item name="android:windowLightStatusBar">true</item>
+        <item name="android:isLightTheme">true</item>
+
     </style>
 
     <style name="Theme.CainiaoTracker" parent="Base.Theme.CainiaoTracker" />
