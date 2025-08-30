@@ -53,6 +53,7 @@
     <color name="md_theme_dark_surface">#1C1B1F</color>
     <color name="md_theme_dark_onSurface">#E6E1E5</color>
     <color name="md_theme_dark_surfaceVariant">#49454F</color>
+    <color name="fundo">#FFFFFF</color>
     <color name="md_theme_dark_onSurfaceVariant">#CAC4D0</color>
     <color name="md_theme_dark_inverseSurface">#E6E1E5</color>
     <color name="md_theme_dark_inverseOnSurface">#313033</color>
@@ -61,4 +62,5 @@
     <color name="md_theme_dark_surfaceTint">#D0BCFF</color>
     <color name="md_theme_dark_outlineVariant">#49454F</color>
     <color name="md_theme_dark_scrim">#000000</color>
+    <color name="borda">#000000</color>
 </resources>

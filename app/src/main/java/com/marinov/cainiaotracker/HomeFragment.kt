@@ -20,6 +20,7 @@ class HomeFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: TrackingAdapter
     private lateinit var searchView: SearchView
+    private lateinit var addItem: MenuItem
     private var allTrackingItems = mutableListOf<TrackingItem>()
     private var archivedTrackingItems = mutableListOf<TrackingItem>()
 
@@ -56,8 +57,27 @@ class HomeFragment : Fragment() {
         }
 
         val searchItem = toolbar.menu.findItem(R.id.action_search)
+        addItem = toolbar.menu.findItem(R.id.action_add)
         searchView = searchItem.actionView as SearchView
         searchView.queryHint = "Buscar por nome ou código..."
+
+        // Listener para ocultar/mostrar o botão de adicionar
+        searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+            override fun onMenuItemActionExpand(item: MenuItem): Boolean {
+                // SearchView expandida, oculta o botão de adicionar
+                addItem.isVisible = false
+                return true // Retorna true para permitir a expansão
+            }
+
+            override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
+                // SearchView recolhida, mostra o botão de adicionar
+                // Usamos post para garantir que a visibilidade seja alterada APÓS a view ser recolhida
+                toolbar.post {
+                    addItem.isVisible = true
+                }
+                return true // Retorna true para permitir o recolhimento
+            }
+        })
 
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {

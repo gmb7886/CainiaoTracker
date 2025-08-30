@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context=".ArchivedFragment">
+    tools:context=".ArchivedFragment"
+    android:background="@color/fundo">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -15,6 +16,7 @@
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar_archived"
             android:layout_width="match_parent"
+            android:background="@color/fundo"
             android:layout_height="?attr/actionBarSize"
             app:menu="@menu/archived_toolbar_menu" />
 
