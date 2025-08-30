@@ -159,11 +159,7 @@ class SettingsFragment : Fragment() {
             try {
                 val apkFile = withContext(Dispatchers.IO) { downloadApk(apkUrl) }
                 progressDialog.dismiss()
-                if (apkFile != null && apkFile.exists() && apkFile.length() > 0) {
-                    showInstallDialog(apkFile)
-                } else {
-                    showError("Falha ao baixar o arquivo. O arquivo está vazio ou não foi baixado corretamente.")
-                }
+                apkFile?.let(::showInstallDialog) ?: showError("Falha ao baixar o arquivo.")
             } catch (e: Exception) {
                 progressDialog.dismiss()
                 Log.e(tag, "Erro no download", e)
@@ -182,29 +178,23 @@ class SettingsFragment : Fragment() {
     }
     private suspend fun downloadApk(apkUrl: String): File? = withContext(Dispatchers.IO) {
         try {
-            Log.d(tag, "Iniciando download do APK: $apkUrl")
             val connection = URL(apkUrl).openConnection() as HttpURLConnection
-            connection.setRequestProperty("User-Agent", "CainiaoTracker-Android")
-            connection.setRequestProperty("Accept", "application/octet-stream")
             connection.connect()
-            Log.d(tag, "Código de resposta: ${connection.responseCode}")
-            if (connection.responseCode != HttpURLConnection.HTTP_OK) {
-                Log.e(tag, "Falha no download: código ${connection.responseCode}")
-                return@withContext null
-            }
-            val fileLength = connection.contentLength
-            Log.d(tag, "Tamanho do arquivo: $fileLength")
+
             val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
             val outputDir = File(downloadsDir, "CainiaoTracker").apply {
                 if (exists()) deleteRecursively()
                 mkdirs()
             }
+
             val outputFile = File(outputDir, "app_release.apk")
             connection.inputStream.use { input ->
                 FileOutputStream(outputFile).use { output ->
                     val buffer = ByteArray(4096)
                     var bytesRead: Int
                     var total: Long = 0
+                    val fileLength = connection.contentLength.toLong()
+
                     while (input.read(buffer).also { bytesRead = it } != -1) {
                         output.write(buffer, 0, bytesRead)
                         total += bytesRead
@@ -216,11 +206,6 @@ class SettingsFragment : Fragment() {
                         }
                     }
                 }
-            }
-            Log.d(tag, "Download concluído. Tamanho do arquivo salvo: ${outputFile.length()}")
-            if (outputFile.length() == 0L) {
-                Log.e(tag, "Arquivo vazio após download.")
-                return@withContext null
             }
             outputFile
         } catch (e: Exception) {
