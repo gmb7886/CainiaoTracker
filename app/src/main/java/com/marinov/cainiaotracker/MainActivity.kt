@@ -306,7 +306,7 @@ class MainActivity : AppCompatActivity() {
 
 
 
-                            ContextCompat.getColor(this@MainActivity, R.color.md_theme_dark_onSecondaryContainer)
+                            ContextCompat.getColor(this@MainActivity, R.color.borda)
 
 
 
@@ -314,7 +314,7 @@ class MainActivity : AppCompatActivity() {
 
 
 
-                            ContextCompat.getColor(this@MainActivity, R.color.md_theme_light_onSecondaryContainer)
+                            ContextCompat.getColor(this@MainActivity, R.color.fundo)
 
 
 
