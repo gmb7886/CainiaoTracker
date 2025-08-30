@@ -359,7 +359,22 @@ class TrackingActivity : AppCompatActivity() {
             // Configurações de segurança
             allowContentAccess = false
             allowFileAccess = false
+            // Desabilita o zoom
+            setSupportZoom(false)
+            builtInZoomControls = false
+            displayZoomControls = false
         }
+
+        // Desabilita a seleção de texto
+        webView.setOnLongClickListener {
+            true // Retorna true para consumir o evento e desativar a seleção de texto
+        }
+
+        // Desabilita a seleção de texto para versões mais antigas do Android
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            webView.isLongClickable = false
+        }
+
 
         // --- IMPLEMENTAÇÃO DO TEMA ESCURO (TÉCNICA ATUALIZADA) ---
         // Força o tema escuro no WebView de forma nativa quando disponível
@@ -548,4 +563,3 @@ class TrackingActivity : AppCompatActivity() {
         const val EXTRA_URL = "extra_url"
     }
 }
-

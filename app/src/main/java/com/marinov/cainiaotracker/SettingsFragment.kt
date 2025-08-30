@@ -1,5 +1,4 @@
 package com.marinov.cainiaotracker
-
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Intent
@@ -28,13 +27,10 @@ import java.io.InputStream
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
-
 class SettingsFragment : Fragment() {
-
     private val tag = "SettingsFragment"
     private val coroutineScope = CoroutineScope(Dispatchers.Main + Job())
     private var progressBar: ProgressBar? = null
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -43,7 +39,6 @@ class SettingsFragment : Fragment() {
         setupUI(view)
         return view
     }
-
     override fun onResume() {
         super.onResume()
         // Verificar se temos uma URL de atualização da MainActivity
@@ -53,11 +48,9 @@ class SettingsFragment : Fragment() {
             promptForUpdate(it)
         }
     }
-
     private fun setupUI(view: View) {
         val btnCheckUpdate = view.findViewById<Button>(R.id.btn_check_update)
         val btnGithub = view.findViewById<Button>(R.id.btn_github)
-
         btnGithub.setOnClickListener {
             openUrl("https://github.com/gmb7886")
         }
@@ -65,7 +58,6 @@ class SettingsFragment : Fragment() {
             checkUpdate()
         }
     }
-
     private fun openUrl(url: String) {
         try {
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
@@ -74,7 +66,6 @@ class SettingsFragment : Fragment() {
             Log.e(tag, "Erro ao abrir URL", e)
         }
     }
-
     private fun checkUpdate() = coroutineScope.launch {
         try {
             val (json, responseCode) = withContext(Dispatchers.IO) {
@@ -85,7 +76,6 @@ class SettingsFragment : Fragment() {
                 connection.setRequestProperty("User-Agent", "CainiaoTracker-Android")
                 connection.connectTimeout = 10000
                 connection.connect()
-
                 try {
                     if (connection.responseCode == HttpURLConnection.HTTP_OK) {
                         connection.inputStream.use { input ->
@@ -98,7 +88,6 @@ class SettingsFragment : Fragment() {
                     connection.disconnect()
                 }
             }
-
             if (json != null) {
                 processReleaseData(json)
             } else {
@@ -109,16 +98,13 @@ class SettingsFragment : Fragment() {
             showError("Erro: ${e.message}")
         }
     }
-
     private fun InputStream.readText(): String {
         return BufferedReader(InputStreamReader(this)).use { it.readText() }
     }
-
     private fun processReleaseData(release: JSONObject) {
         activity?.runOnUiThread {
             val latest = release.getString("tag_name")
             val current = getCurrentVersionName()
-
             if (isVersionGreater(latest, current)) {
                 val assets = release.getJSONArray("assets")
                 var apkUrl: String? = null
@@ -135,7 +121,6 @@ class SettingsFragment : Fragment() {
             }
         }
     }
-
     private fun getCurrentVersionName(): String {
         return try {
             requireContext().packageManager.getPackageInfo(requireContext().packageName, 0).versionName ?: "1.0.0"
@@ -143,11 +128,9 @@ class SettingsFragment : Fragment() {
             "1.0.0"
         }
     }
-
     private fun getCurrentApplicationId(): String {
         return requireContext().packageName
     }
-
     private fun isVersionGreater(newVersion: String, currentVersion: String): Boolean {
         val newParts = newVersion.removePrefix("v").split(".").map { it.toInt() }
         val currentParts = currentVersion.removePrefix("v").split(".").map { it.toInt() }
@@ -160,7 +143,6 @@ class SettingsFragment : Fragment() {
         }
         return false
     }
-
     private fun promptForUpdate(url: String) {
         activity?.runOnUiThread {
             AlertDialog.Builder(requireContext())
@@ -171,14 +153,17 @@ class SettingsFragment : Fragment() {
                 .show()
         }
     }
-
     private fun startManualDownload(apkUrl: String) {
         coroutineScope.launch {
             val progressDialog = createProgressDialog().apply { show() }
             try {
                 val apkFile = withContext(Dispatchers.IO) { downloadApk(apkUrl) }
                 progressDialog.dismiss()
-                apkFile?.let { showInstallDialog(it) } ?: showError("Falha ao baixar o arquivo.")
+                if (apkFile != null && apkFile.exists() && apkFile.length() > 0) {
+                    showInstallDialog(apkFile)
+                } else {
+                    showError("Falha ao baixar o arquivo. O arquivo está vazio ou não foi baixado corretamente.")
+                }
             } catch (e: Exception) {
                 progressDialog.dismiss()
                 Log.e(tag, "Erro no download", e)
@@ -186,7 +171,6 @@ class SettingsFragment : Fragment() {
             }
         }
     }
-
     @SuppressLint("InflateParams")
     private fun createProgressDialog(): AlertDialog {
         val view = layoutInflater.inflate(R.layout.dialog_download_progress, null)
@@ -196,26 +180,31 @@ class SettingsFragment : Fragment() {
             .setCancelable(false)
             .create()
     }
-
     private suspend fun downloadApk(apkUrl: String): File? = withContext(Dispatchers.IO) {
         try {
+            Log.d(tag, "Iniciando download do APK: $apkUrl")
             val connection = URL(apkUrl).openConnection() as HttpURLConnection
+            connection.setRequestProperty("User-Agent", "CainiaoTracker-Android")
+            connection.setRequestProperty("Accept", "application/octet-stream")
             connection.connect()
-
+            Log.d(tag, "Código de resposta: ${connection.responseCode}")
+            if (connection.responseCode != HttpURLConnection.HTTP_OK) {
+                Log.e(tag, "Falha no download: código ${connection.responseCode}")
+                return@withContext null
+            }
+            val fileLength = connection.contentLength
+            Log.d(tag, "Tamanho do arquivo: $fileLength")
             val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
             val outputDir = File(downloadsDir, "CainiaoTracker").apply {
                 if (exists()) deleteRecursively()
                 mkdirs()
             }
-
             val outputFile = File(outputDir, "app_release.apk")
             connection.inputStream.use { input ->
                 FileOutputStream(outputFile).use { output ->
                     val buffer = ByteArray(4096)
                     var bytesRead: Int
                     var total: Long = 0
-                    val fileLength = connection.contentLength.toLong()
-
                     while (input.read(buffer).also { bytesRead = it } != -1) {
                         output.write(buffer, 0, bytesRead)
                         total += bytesRead
@@ -228,13 +217,17 @@ class SettingsFragment : Fragment() {
                     }
                 }
             }
+            Log.d(tag, "Download concluído. Tamanho do arquivo salvo: ${outputFile.length()}")
+            if (outputFile.length() == 0L) {
+                Log.e(tag, "Arquivo vazio após download.")
+                return@withContext null
+            }
             outputFile
         } catch (e: Exception) {
             Log.e(tag, "Erro no download", e)
             null
         }
     }
-
     private fun showInstallDialog(apkFile: File) {
         activity?.runOnUiThread {
             try {
@@ -242,19 +235,16 @@ class SettingsFragment : Fragment() {
                     showError("Arquivo APK não encontrado")
                     return@runOnUiThread
                 }
-
                 val apkUri = FileProvider.getUriForFile(
                     requireContext(),
                     "${getCurrentApplicationId()}.provider",
                     apkFile
                 )
-
                 val installIntent = Intent(Intent.ACTION_VIEW).apply {
                     setDataAndType(apkUri, "application/vnd.android.package-archive")
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
-
                 if (installIntent.resolveActivity(requireContext().packageManager) != null) {
                     AlertDialog.Builder(requireContext())
                         .setTitle("Download concluído")
@@ -271,7 +261,6 @@ class SettingsFragment : Fragment() {
             }
         }
     }
-
     private fun showMessage(msg: String) {
         activity?.runOnUiThread {
             AlertDialog.Builder(requireContext())
@@ -280,7 +269,6 @@ class SettingsFragment : Fragment() {
                 .show()
         }
     }
-
     private fun showError(msg: String) {
         activity?.runOnUiThread {
             AlertDialog.Builder(requireContext())
@@ -290,7 +278,6 @@ class SettingsFragment : Fragment() {
                 .show()
         }
     }
-
     override fun onDestroy() {
         super.onDestroy()
         coroutineScope.cancel()
